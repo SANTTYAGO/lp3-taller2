@@ -18,6 +18,5 @@ if __name__ == "__main__":
     # Determinar si se debe usar modo debug
     debug = os.getenv("DEBUG", "False").lower() in ["true", "1", "t"]
     
-    # TODO: Ejecutar aplicación
-
-    pass
+    # Ejecutar aplicación
+    app.run(host="0.0.0.0", port=port, debug=debug)
