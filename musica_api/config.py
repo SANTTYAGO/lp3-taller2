@@ -46,13 +46,16 @@ config_by_name = {
 }
 
 # Obtener configuración según el entorno
-def get_config():
+def get_config(config_name=None):
     """
     Obtiene la configuración según el entorno especificado en las variables de entorno.
+    
+    Args:
+        config_name (str): Nombre del entorno de configuración (opcional).
     
     Returns:
         object: Clase de configuración según el entorno.
     """
-    env = os.getenv('FLASK_ENV', 'development')
+    env = config_name or os.getenv('FLASK_ENV', 'development')
     return config_by_name.get(env, config_by_name['default'])
 
