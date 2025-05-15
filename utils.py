@@ -57,8 +57,9 @@ def generar_slug(texto):
     # Reemplazar múltiples guiones con uno solo
     slug = re.sub(r"-{2,}", "-", slug)
   
-    # TODO: Eliminar guiones al inicio y final
-    
+    # Eliminar guiones al inicio y final
+    slug = slug.strip("-")
+  
     return slug
 
 def obtener_año_actual():
