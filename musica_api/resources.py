@@ -117,8 +117,8 @@ class CancionListAPI(Resource):
     @ns.marshal_list_with(cancion_model)
     def get(self):
         """Obtiene todas las canciones registradas"""
-        # TODO: pendiente de implementar
-        pass
+        canciones = Cancion.query.all()
+        return canciones, 200
     
     @ns.doc("Crear una nueva canción")
     @ns.expect(cancion_base)
