@@ -33,8 +33,8 @@ class UsuarioListAPI(Resource):
     @ns.marshal_list_with(usuario_model)
     def get(self):
         """Obtiene todos los usuarios registrados"""
-        # TODO: pendiente de implementar
-        pass
+        usuarios = Usuario.query.all()
+        return usuarios, 200
     
     @ns.doc("Crear un nuevo usuario")
     @ns.expect(usuario_base)
