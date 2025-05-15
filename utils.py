@@ -48,8 +48,9 @@ def generar_slug(texto):
     # Convertir a minúsculas
     slug = texto.lower()
     
-    # TODO: Reemplazar espacios con guiones
-    
+    # Reemplazar espacios con guiones
+    slug = re.sub(r"\s+", "-", slug)
+  
     # TODO: Eliminar caracteres no alfanuméricos (excepto guiones)
     
     # TODO: Reemplazar múltiples guiones con uno solo
