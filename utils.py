@@ -54,8 +54,9 @@ def generar_slug(texto):
     # Eliminar caracteres no alfanuméricos (excepto guiones)
     slug = re.sub(r"[^a-z0-9-]", "", slug)
   
-    # TODO: Reemplazar múltiples guiones con uno solo
-    
+    # Reemplazar múltiples guiones con uno solo
+    slug = re.sub(r"-{2,}", "-", slug)
+  
     # TODO: Eliminar guiones al inicio y final
     
     return slug
