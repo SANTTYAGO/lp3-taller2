@@ -45,8 +45,8 @@ def generar_slug(texto):
     Returns:
         str: Slug generado
     """
-    # TODO: Convertir a minúsculas
-    slug = texto
+    # Convertir a minúsculas
+    slug = texto.lower()
     
     # TODO: Reemplazar espacios con guiones
     
