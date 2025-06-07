@@ -11,7 +11,6 @@ load_dotenv()
 class Config:
     """Configuración base para la aplicación."""
     # Configuración de la base de datos
-    # FIXME: la ubicación de la base de datos no funciona
     SQLALCHEMY_DATABASE_URI = os.getenv('SQLALCHEMY_DATABASE_URI', 'sqlite:///musica.db')
     SQLALCHEMY_TRACK_MODIFICATIONS = os.getenv('SQLALCHEMY_TRACK_MODIFICATIONS', 'False').lower() == 'true'
     
