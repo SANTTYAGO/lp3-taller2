@@ -6,6 +6,7 @@ from flask import Flask
 from .extensions import api, db
 from .resources import ns
 from .config import get_config
+from .extensions import api, db, jwt
 
 def create_app(config_name=None):
     """
@@ -28,6 +29,7 @@ def create_app(config_name=None):
     # Inicialización de extensiones
     db.init_app(app)
     api.init_app(app)
+    jwt.init_app(app)  # Inicializar JWT
     
     # Registro de namespaces
     api.add_namespace(ns)

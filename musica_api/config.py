@@ -20,6 +20,7 @@ class Config:
     
     # Otras configuraciones generales
     SECRET_KEY = os.getenv('SECRET_KEY', 'clave-secreta-predeterminada')
+    JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY', 'jwt-clave-secreta')  # Clave para JWT
 
 class DevelopmentConfig(Config):
     """Configuración para entorno de desarrollo."""

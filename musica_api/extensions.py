@@ -4,6 +4,10 @@ Define las instancias de las extensiones utilizadas en todo el proyecto.
 """
 from flask_sqlalchemy import SQLAlchemy 
 from flask_restx import Api
+from flask_jwt_extended import JWTManager
+
+# Inicializar JWT
+jwt = JWTManager()
 
 # API RESTful con documentación Swagger integrada
 api = Api(

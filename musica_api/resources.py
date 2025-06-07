@@ -12,9 +12,27 @@ from .api_models import (
 )
 from .extensions import db
 from .models import Usuario, Cancion, Favorito
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 
 # Namespace para agrupar los recursos de la API
 ns = Namespace("api", description="Operaciones de la API de música")
+
+@ns.route("/login")
+class LoginAPI(Resource):
+    @ns.doc("Iniciar sesión")
+    @ns.expect(usuario_base)
+    @ns.response(200, "Inicio de sesión exitoso")
+    @ns.response(401, "Credenciales inválidas")
+    def post(self):
+        """Autenticar usuario y generar token JWT"""
+        data = request.json
+        usuario = Usuario.query.filter_by(correo=data["correo"]).first()
+        
+        if usuario and usuario.nombre == data["nombre"]:  # Validación básica
+            access_token = create_access_token(identity=str(usuario.id))
+            return {"access_token": access_token}, 200
+        else:
+            ns.abort(401, "Credenciales inválidas")
 
 # Recurso para probar la API
 @ns.route("/ping")
@@ -66,10 +84,12 @@ class UsuarioListAPI(Resource):
 @ns.param("id", "Identificador único del usuario")
 @ns.response(404, "Usuario no encontrado")
 class UsuarioAPI(Resource):
+    @jwt_required()
     @ns.doc("Obtener un usuario por su ID")
     @ns.marshal_with(usuario_model)
     def get(self, id):
         """Obtiene un usuario por su ID"""
+        usuario_id = get_jwt_identity()  # Esto devuelve el `identity` del token
         usuario = Usuario.query.get_or_404(id)
         return usuario, 200
     
