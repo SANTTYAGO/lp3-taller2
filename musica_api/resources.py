@@ -30,7 +30,18 @@ class LoginAPI(Resource):
         
         if usuario and usuario.nombre == data["nombre"]:  # Validación básica
             access_token = create_access_token(identity=str(usuario.id))
-            return {"access_token": access_token}, 200
+
+            # Obtener favoritos del usuario
+            favoritos = Favorito.query.filter_by(id_usuario=usuario.id).all()
+            favoritos_data = [
+                {
+                    "id_cancion": f.id_cancion,
+                    "fecha_marcado": f.fecha_marcado.isoformat()  # Convertir datetime a cadena
+                }
+                for f in favoritos
+            ]
+
+            return {"access_token": access_token, "favoritos": favoritos_data}, 200
         else:
             ns.abort(401, "Credenciales inválidas")
 
@@ -89,7 +100,7 @@ class UsuarioAPI(Resource):
     @ns.marshal_with(usuario_model)
     def get(self, id):
         """Obtiene un usuario por su ID"""
-        usuario_id = get_jwt_identity()  # Esto devuelve el `identity` del token
+        id_usuario = get_jwt_identity()  # Esto devuelve el `identity` del token
         usuario = Usuario.query.get_or_404(id)
         return usuario, 200
     
@@ -316,14 +327,19 @@ class FavoritoAPI(Resource):
 @ns.param("id", "Identificador único del usuario")
 @ns.response(404, "Usuario no encontrado")
 class UsuarioFavoritosAPI(Resource):
+    @jwt_required()
     @ns.doc("Obtener las canciones favoritas de un usuario")
     @ns.marshal_with(favoritos_usuario_model)
     def get(self, id):
         """Obtiene todas las canciones favoritas de un usuario"""
+        id_usuario = get_jwt_identity()  # Identidad del usuario autenticado
+        if int( id_usuario) != id:
+            ns.abort(403, "No tienes permiso para acceder a estos favoritos")
         usuario = Usuario.query.get_or_404(id)
         
         # Obtener los favoritos del usuario
         favoritos = Favorito.query.filter_by(id_usuario=id).all()
+        return [{" id_cancion": f. id_cancion, "fecha_marcado": f.fecha_marcado} for f in favoritos], 200        
         
         # Extraer las canciones de los favoritos
         canciones_favoritas = [
@@ -347,42 +363,28 @@ class UsuarioFavoritosAPI(Resource):
 @ns.param("id_usuario", "Identificador único del usuario")
 @ns.param("id_cancion", "Identificador único de la canción")
 class UsuarioCancionFavoritoAPI(Resource):
+    @jwt_required()    
     @ns.doc("Marcar o desmarcar una canción como favorita para un usuario")
     @ns.response(201, "Canción marcada como favorita")
     @ns.response(204, "Canción desmarcada como favorita")
     @ns.response(404, "Usuario o canción no encontrada")
     def post(self, id_usuario, id_cancion):
-        """Marca una canción como favorita para un usuario"""
-        # Verificar si existen el usuario y la canción
-        usuario = Usuario.query.get(id_usuario)
-        cancion = Cancion.query.get(id_cancion)
+        """Agrega una canción a los favoritos del usuario"""
+        id_usuario = get_jwt_identity()
+        if int( id_usuario) != id_usuario:
+            ns.abort(403, "No tienes permiso para modificar estos favoritos")
         
-        if not usuario:
-            ns.abort(404, "Usuario no encontrado")
-        if not cancion:
-            ns.abort(404, "Canción no encontrada")
+        favorito_existente = Favorito.query.filter_by( id_usuario=id_usuario,  id_cancion=id_cancion).first()
+        if favorito_existente:
+            return {"mensaje": "La canción ya está en favoritos"}, 400
         
-        # Verificar si ya existe el favorito
-        favorito = Favorito.query.filter_by(
-            id_usuario=id_usuario,
-            id_cancion=id_cancion
-        ).first()
-        
-        if favorito:
-            ns.abort(400, "La canción ya está marcada como favorita para este usuario")
-        
-        favorito = Favorito(
-            id_usuario=id_usuario,
-            id_cancion=id_cancion
-        )
-        
-        try:
-            db.session.add(favorito)
-            db.session.commit()
-            return {"mensaje": "Canción marcada como favorita"}, 201
-        except Exception as e:
-            db.session.rollback()
-            ns.abort(400, f"Error al marcar como favorito: {str(e)}")
+        nuevo_favorito = Favorito( id_usuario=id_usuario,  id_cancion=id_cancion)
+        db.session.add(nuevo_favorito)
+        db.session.commit()
+        return {"mensaje": "Canción agregada a favoritos"}, 201
+        # except Exception as e:
+        #     db.session.rollback()
+        #     ns.abort(400, f"Error al marcar como favorito: {str(e)}")
     
     @ns.doc("Eliminar una canción de favoritos")
     @ns.response(204, "Canción eliminada de favoritos")
